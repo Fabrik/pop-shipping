@@ -443,7 +443,7 @@ class Gso extends AbstractAdapter
 	 *
 	 * @throws \Exception
 	 *
-	 * @return string Shipping label
+	 * @return array [String:filetype, String:Label image data]
 	 */
 	public function ship($verifyPeer = true)
 	{
@@ -538,7 +538,7 @@ class Gso extends AbstractAdapter
 
 		$label = $this->response->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image;
 
-		return $label;
+		return ['gif', $label];
 	}
 
 	private function getClient()
