@@ -28,30 +28,35 @@ class Fedex extends AbstractAdapter
 
     /**
      * SOAP Client
+     *
      * @var \SoapClient
      */
     protected $client = null;
 
     /**
      * FedEx WSDL File
+     *
      * @var string
      */
     protected $wsdl = null;
 
     /**
      * Request array
+     *
      * @var array
      */
     protected $request = null;
 
     /**
      * Request header - common header to apply to all API requests
+     *
      * @var array
      */
     protected $requestHeader = [];
 
     /**
      * Ship to fields
+     *
      * @var array
      */
     protected $shipTo = [
@@ -72,6 +77,7 @@ class Fedex extends AbstractAdapter
 
     /**
      * Ship from fields
+     *
      * @var array
      */
     protected $shipFrom = [
@@ -89,18 +95,20 @@ class Fedex extends AbstractAdapter
         ]
     ];
 
-	/**
-	 * Drop of types
-	 * @var array
-	 */
-	protected $dropOfTypes = [
-		'REGULAR_PICKUP', 'REQUEST_COURIER', 'DROP_BOX', 'BUSINESS_SERVICE_CENTER', 'STATION'
-	];
+    /**
+     * Drop of types
+     *
+     * @var array
+     */
+    protected $dropOfTypes = [
+        'REGULAR_PICKUP', 'REQUEST_COURIER', 'DROP_BOX', 'BUSINESS_SERVICE_CENTER', 'STATION'
+    ];
 
-	protected $dropOfType = 'REGULAR_PICKUP';
+    protected $dropOfType = 'REGULAR_PICKUP';
 
     /**
      * Package dimensions
+     *
      * @var array
      */
     protected $dimensions = [
@@ -112,6 +120,7 @@ class Fedex extends AbstractAdapter
 
     /**
      * Package weight
+     *
      * @var array
      */
     protected $weight = [
@@ -121,6 +130,7 @@ class Fedex extends AbstractAdapter
 
     /**
      * Services
+     *
      * @var array
      */
     protected static $services = [
@@ -135,10 +145,11 @@ class Fedex extends AbstractAdapter
 
     /**
      * Shipping options
+     *
      * @var array
      */
     protected $shippingOptions = [
-        'alcohol' => true,
+        'alcohol'              => true,
         'alcoholRecipientType' => 'LICENSEE'
     ];
 
@@ -154,6 +165,7 @@ class Fedex extends AbstractAdapter
      * @param  string $account
      * @param  string $meter
      * @param  string $wsdl
+     *
      * @return Fedex
      */
     public function __construct($key, $password, $account, $meter, $wsdl)
@@ -162,12 +174,12 @@ class Fedex extends AbstractAdapter
         {
             $wsdl = ['rates' => $wsdl];
         }
-        $this->wsdl = $wsdl;
+        $this->wsdl          = $wsdl;
         $this->accountNumber = $account;
         ini_set('soap.wsdl_cache_enabled', '0');
 
         $this->requestHeader['WebAuthenticationDetail'] = [
-            'UserCredential' =>[
+            'UserCredential' => [
                 'Key'      => $key,
                 'Password' => $password
             ]
@@ -196,30 +208,73 @@ class Fedex extends AbstractAdapter
     /**
      * Set ship to
      *
-     * @param  array  $shipTo
+     * @param  array $shipTo
+     *
      * @return mixed
      */
     public function shipTo(array $shipTo)
     {
-        foreach ($shipTo as $key => $value) {
-            if (stripos($key, 'person') !== false) {
+        foreach ($shipTo as $key => $value)
+        {
+            if (stripos($key, 'person') !== false)
+            {
                 $this->shipTo['Contact']['PersonName'] = $value;
-            } else if (stripos($key, 'company') !== false) {
-                $this->shipTo['Contact']['CompanyName'] = $value;
-            } else if (stripos($key, 'phone') !== false) {
-                $this->shipTo['Contact']['PhoneNumber'] = $value;
-            } else if (stripos($key, 'address') !== false) {
-                $this->shipTo['Address']['StreetLines'][] = $value;
-            } else if (strtolower($key) == 'city') {
-                $this->shipTo['Address']['City'] = $value;
-            } else if ((stripos($key, 'state') !== false) || (stripos($key, 'province') !== false)) {
-                $this->shipTo['Address']['StateOrProvinceCode'] = $value;
-            } else if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip')) {
-                $this->shipTo['Address']['PostalCode'] = $value;
-            } else if ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country')) {
-                $this->shipTo['Address']['CountryCode'] = $value;
-            } else if (strtolower($key) == 'residential') {
-                $this->shipTo['Address']['Residential'] = $value;
+            }
+            else
+            {
+                if (stripos($key, 'company') !== false)
+                {
+                    $this->shipTo['Contact']['CompanyName'] = $value;
+                }
+                else
+                {
+                    if (stripos($key, 'phone') !== false)
+                    {
+                        $this->shipTo['Contact']['PhoneNumber'] = $value;
+                    }
+                    else
+                    {
+                        if (stripos($key, 'address') !== false)
+                        {
+                            $this->shipTo['Address']['StreetLines'][] = $value;
+                        }
+                        else
+                        {
+                            if (strtolower($key) == 'city')
+                            {
+                                $this->shipTo['Address']['City'] = $value;
+                            }
+                            else
+                            {
+                                if ((stripos($key, 'state') !== false) || (stripos($key, 'province') !== false))
+                                {
+                                    $this->shipTo['Address']['StateOrProvinceCode'] = $value;
+                                }
+                                else
+                                {
+                                    if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip'))
+                                    {
+                                        $this->shipTo['Address']['PostalCode'] = $value;
+                                    }
+                                    else
+                                    {
+                                        if ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country'))
+                                        {
+                                            $this->shipTo['Address']['CountryCode'] = $value;
+                                        }
+                                        else
+                                        {
+                                            if (strtolower($key) == 'residential')
+                                            {
+                                                $this->shipTo['Address']['Residential'] = $value;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -229,30 +284,73 @@ class Fedex extends AbstractAdapter
     /**
      * Set ship from
      *
-     * @param  array  $shipFrom
+     * @param  array $shipFrom
+     *
      * @return mixed
      */
     public function shipFrom(array $shipFrom)
     {
-        foreach ($shipFrom as $key => $value) {
-            if (stripos($key, 'person') !== false) {
+        foreach ($shipFrom as $key => $value)
+        {
+            if (stripos($key, 'person') !== false)
+            {
                 $this->shipFrom['Contact']['PersonName'] = $value;
-            } else if (stripos($key, 'company') !== false) {
-                $this->shipFrom['Contact']['CompanyName'] = $value;
-            } else if (stripos($key, 'phone') !== false) {
-                $this->shipFrom['Contact']['PhoneNumber'] = $value;
-            } else if (stripos($key, 'address') !== false) {
-                $this->shipFrom['Address']['StreetLines'][] = $value;
-            } else if (strtolower($key) == 'city') {
-                $this->shipFrom['Address']['City'] = $value;
-            } else if ((stripos($key, 'state') !== false) || (stripos($key, 'province') !== false)) {
-                $this->shipFrom['Address']['StateOrProvinceCode'] = $value;
-            } else if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip')) {
-                $this->shipFrom['Address']['PostalCode'] = $value;
-            } else if ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country')) {
-                $this->shipFrom['Address']['CountryCode'] = $value;
-            } else if (strtolower($key) == 'residential') {
-                $this->shipFrom['Address']['Residential'] = $value;
+            }
+            else
+            {
+                if (stripos($key, 'company') !== false)
+                {
+                    $this->shipFrom['Contact']['CompanyName'] = $value;
+                }
+                else
+                {
+                    if (stripos($key, 'phone') !== false)
+                    {
+                        $this->shipFrom['Contact']['PhoneNumber'] = $value;
+                    }
+                    else
+                    {
+                        if (stripos($key, 'address') !== false)
+                        {
+                            $this->shipFrom['Address']['StreetLines'][] = $value;
+                        }
+                        else
+                        {
+                            if (strtolower($key) == 'city')
+                            {
+                                $this->shipFrom['Address']['City'] = $value;
+                            }
+                            else
+                            {
+                                if ((stripos($key, 'state') !== false) || (stripos($key, 'province') !== false))
+                                {
+                                    $this->shipFrom['Address']['StateOrProvinceCode'] = $value;
+                                }
+                                else
+                                {
+                                    if ((strtolower($key) == 'postalcode') || (strtolower($key) == 'zipcode') || (strtolower($key) == 'zip'))
+                                    {
+                                        $this->shipFrom['Address']['PostalCode'] = $value;
+                                    }
+                                    else
+                                    {
+                                        if ((strtolower($key) == 'countrycode') || (strtolower($key) == 'country'))
+                                        {
+                                            $this->shipFrom['Address']['CountryCode'] = $value;
+                                        }
+                                        else
+                                        {
+                                            if (strtolower($key) == 'residential')
+                                            {
+                                                $this->shipFrom['Address']['Residential'] = $value;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -267,29 +365,31 @@ class Fedex extends AbstractAdapter
     protected function addShippingChargesPayment()
     {
         $shippingChargesPayment = array('PaymentType' => 'SENDER',
-            'Payor' => array(
-                'ResponsibleParty' => array(
-                    'AccountNumber' => $this->accountNumber,
-                    'Contact' => null,
-                    'Address' => array(
-                        'CountryCode' => 'US'
-                    )
-                )
-            )
+                                        'Payor'       => array(
+                                            'ResponsibleParty' => array(
+                                                'AccountNumber' => $this->accountNumber,
+                                                'Contact'       => null,
+                                                'Address'       => array(
+                                                    'CountryCode' => 'US'
+                                                )
+                                            )
+                                        )
         );
+
         return $shippingChargesPayment;
     }
 
     /**
      * Add label specification to shipping.
+     *
      * @return array
      */
     protected function addLabelSpecification()
     {
         $labelSpecification = array(
             'LabelFormatType' => 'COMMON2D', // valid values COMMON2D, LABEL_DATA_ONLY
-            'ImageType' => 'PNG',  // valid values DPL, EPL2, PDF, ZPLII and PNG
-            'LabelStockType' => 'PAPER_7X4.75'
+            'ImageType'       => 'PNG',  // valid values DPL, EPL2, PDF, ZPLII and PNG
+            'LabelStockType'  => 'PAPER_7X4.75'
         );
 
         if ($this->shippingOptions['alcohol'])
@@ -302,32 +402,45 @@ class Fedex extends AbstractAdapter
 
     /**
      * Add a shipping package line item
+     *
+     * @param int $index
+     *
      * @return array
      */
-    protected function addPackageLineItem1()
+    protected function addPackageLineItem($index = 0)
     {
+        $package = $this->packages[$index];
+
         // @TODO - insured value & amount & customer reference
         $packageLineItem = array(
-            'SequenceNumber'=> 1,
-            'GroupPackageCount'=> 1,
-            'InsuredValue' => array(
-                'Amount' => floatval($this->insuranceValue),
+            'SequenceNumber'     => $index + 1,
+            'GroupPackageCount'  => 1,
+            'InsuredValue'       => array(
+                'Amount'   => floatval($this->insuranceValue),
                 'Currency' => 'USD'
             ),
-            'Weight' => $this->weight,
-            'Dimensions' => $this->dimensions,
+            'Weight'             =>  [
+                'Value' => $package->getWeight(),
+                'Units' => 'LB'
+            ],
+            'Dimensions'         =>  [
+                'Length' => null,
+                'Width'  => null,
+                'Height' => null,
+                'Units'  => 'IN'
+            ],
             'CustomerReferences' => array(
                 '0' => array(
                     'CustomerReferenceType' => 'CUSTOMER_REFERENCE', // valid values CUSTOMER_REFERENCE, INVOICE_NUMBER, P_O_NUMBER and SHIPMENT_INTEGRITY
-                    'Value' => 'GR4567892'
+                    'Value'                 => 'GR4567892'
                 ),
                 '1' => array(
                     'CustomerReferenceType' => 'INVOICE_NUMBER',
-                    'Value' => 'INV4567892'
+                    'Value'                 => 'INV4567892'
                 ),
                 '2' => array(
                     'CustomerReferenceType' => 'P_O_NUMBER',
-                    'Value' => 'PO4567892'
+                    'Value'                 => 'PO4567892'
                 )
             )
         );
@@ -336,7 +449,7 @@ class Fedex extends AbstractAdapter
         {
             $packageLineItem['SpecialServicesRequested'] = [
                 'SpecialServiceTypes' => 'ALCOHOL',
-                'AlcoholDetail' => [
+                'AlcoholDetail'       => [
                     'RecipientType' => $this->shippingOptions['alcoholRecipientType']
                 ]
             ];
@@ -347,19 +460,20 @@ class Fedex extends AbstractAdapter
 
     /**
      * Set the drop off type
+     *
      * @param $type
      */
-	protected function setDropOfType($type)
-	{
-		if (in_array($this->dropOfTypes, $type))
-		{
-			$this->dropOfType = $type;
-		}
-		else
-		{
-			$this->dropOfType = 'REGULAR_PICKUP';
-		}
-	}
+    protected function setDropOfType($type)
+    {
+        if (in_array($this->dropOfTypes, $type))
+        {
+            $this->dropOfType = $type;
+        }
+        else
+        {
+            $this->dropOfType = 'REGULAR_PICKUP';
+        }
+    }
 
     /**
      * Confirm a shipment
@@ -368,46 +482,84 @@ class Fedex extends AbstractAdapter
      *
      * @throws \Exception
      *
-     * @return string Shipping label
+     * @return array [String:filetype, String:Label image data]
      */
     public function ship($verifyPeer = true)
     {
         $request = [];
 
         $request['Version'] = array(
-            'ServiceId' => 'ship',
-            'Major' => '17',
+            'ServiceId'    => 'ship',
+            'Major'        => '17',
             'Intermediate' => '0',
-            'Minor' => '0'
+            'Minor'        => '0'
         );
 
         $serviceType = isset($this->shippingInfo->serviceType) ? $this->shippingInfo->serviceType : 'STANDARD_OVERNIGHT';
         $packageType = isset($this->shippingInfo->PackagingType) ? $this->shippingInfo->PackagingType : 'YOUR_PACKAGING';
 
         $request['RequestedShipment'] = array(
-            'ShipTimestamp' => date('c'),
-            'DropoffType' => $this->dropOfType,
-            'ServiceType' => $serviceType, // valid values STANDARD_OVERNIGHT, PRIORITY_OVERNIGHT, FEDEX_GROUND, ...
-            'PackagingType' => $packageType, // valid values FEDEX_BOX, FEDEX_PAK, FEDEX_TUBE, YOUR_PACKAGING, ...
-            'Shipper' => $this->shipFrom,
-            'Recipient' => $this->shipTo,
+            'ShipTimestamp'          => date('c'),
+            'DropoffType'            => $this->dropOfType,
+            'ServiceType'            => $serviceType, // valid values STANDARD_OVERNIGHT, PRIORITY_OVERNIGHT, FEDEX_GROUND, ...
+            'PackagingType'          => $packageType, // valid values FEDEX_BOX, FEDEX_PAK, FEDEX_TUBE, YOUR_PACKAGING, ...
+            'Shipper'                => $this->shipFrom,
+            'Recipient'              => $this->shipTo,
             'ShippingChargesPayment' => $this->addShippingChargesPayment(),
-            'LabelSpecification' => $this->addLabelSpecification(),
+            'LabelSpecification'     => $this->addLabelSpecification(),
 
-            'CustomerSpecifiedDetail' => array('MaskedData'=> 'SHIPPER_ACCOUNT_NUMBER'),
-            'PackageCount' => 1,
+            'CustomerSpecifiedDetail'   => array('MaskedData' => 'SHIPPER_ACCOUNT_NUMBER'),
+            'PackageCount'              => count($this->packages),
             'RequestedPackageLineItems' => array(
-                '0' => $this->addPackageLineItem1()
+                '0' => $this->addPackageLineItem(0)
             )
         );
 
-        $request = array_merge($this->requestHeader, $request);
-        $this->client = new \SoapClient($this->wsdl['shipping'], ['trace' => 1]);
-        $this->response = $this->client->processShipment($request);
+        //$masterResponse = $this->client->processShipment($masterRequest);  // FedEx web service invocation for master label
 
-        if ($this->response->HighestSeverity === 'ERROR')
+        try
         {
-            $errors = $this->response->Notifications;
+            $request        = array_merge($this->requestHeader, $request);
+            $this->client   = new \SoapClient($this->wsdl['shipping'], ['trace' => 1]);
+            $this->response = $this->client->processShipment($request);
+            $this->handleShipmentResponse($this->response);
+            $masterTrackingId = $this->response->CompletedShipmentDetail->MasterTrackingId;
+            $labels[]         = base64_decode($this->response->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image);
+
+            if (count($this->packages) > 1)
+            {
+                for ($i = 1; $i < count($this->packages); $i++)
+                {
+
+                    $request['MasterTrackingId']          = $masterTrackingId;
+                    $request['RequestedPackageLineItems'] = array(
+                        '0' => $this->addPackageLineItem($i)
+                    );
+                    $childResponse                        = $this->client->processShipment($request);
+                    print_r($childResponse);
+                    $this->handleShipmentResponse($childResponse);
+                    $labels[] = base64_decode($childResponse->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            throw new \Exception($e->getMessage(), $e->getCode());
+        }
+
+        echo "<pre>";
+        print_r($this->response);
+
+        exit;
+
+        return ['png', $labels];
+    }
+
+    private function handleShipmentResponse($response)
+    {
+        if ($response->HighestSeverity === 'FAILURE ' || $response->HighestSeverity === 'ERROR')
+        {
+            $errors = $response->Notifications;
 
             if (is_object($errors))
             {
@@ -424,10 +576,6 @@ class Fedex extends AbstractAdapter
 
             throw new \Exception(implode("\n", $errorMsg), $errors[0]->Code);
         }
-
-        $label = $this->response->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image;
-
-       return $label;
     }
 
     /**
@@ -444,43 +592,56 @@ class Fedex extends AbstractAdapter
             'Minor'        => '0'
         ];
 
-	    $request['RequestedShipment'] = [
-		    'RateRequestTypes' => 'ACCOUNT',
-		    'RateRequestTypes' => 'LIST',
-		    'PackageCount' => count($this->packages),
-		    'Shipper' => $this->shipFrom,
-		    'Recipient' => $this->shipTo,
-		    'RequestedPackageLineItems' => []
-	    ];
+        $request['RequestedShipment'] = [
+            'RateRequestTypes'          => 'ACCOUNT',
+            'RateRequestTypes'          => 'LIST',
+            'PackageCount'              => count($this->packages),
+            'Shipper'                   => $this->shipFrom,
+            'Recipient'                 => $this->shipTo,
+            'RequestedPackageLineItems' => []
+        ];
 
         foreach ($this->packages as $package)
         {
             $request['RequestedShipment']['RequestedPackageLineItems'][] = $package->rateRequest();
         }
 
-        $request = array_merge($this->requestHeader, $request);
-        $this->client = new \SoapClient($this->wsdl['rates'], ['trace' => 1]);
-        $this->response = $this->client->getRates($request);
-        $this->responseCode = (int) $this->response->Notifications->Code;
+        $request               = array_merge($this->requestHeader, $request);
+        $this->client          = new \SoapClient($this->wsdl['rates'], ['trace' => 1]);
+        $this->response        = $this->client->getRates($request);
+        $this->responseCode    = (int) $this->response->Notifications->Code;
         $this->responseMessage = (string) $this->response->Notifications->Message;
-	    $this->ratesExtended = [];
+        $this->ratesExtended   = [];
 
-        if ($this->responseCode == 0) {
-            foreach ($this->response->RateReplyDetails as $rate) {
-	            $serviceType = (string) $rate->ServiceType;
-	            $total = number_format((string) $rate->RatedShipmentDetails[0]->ShipmentRateDetail->TotalNetCharge->Amount, 2);
+        if ($this->responseCode == 0)
+        {
 
-	            $this->ratesExtended[$serviceType] = (object) [
-                    'shipper' => 'fedex',
-		            'total' => $total,
-		            'PackagingType' => (string) $rate->PackagingType,
-		            'SignatureOption' => (string) $rate->SignatureOption,
-		            'ActualRateType' => (string) $rate->ActualRateType,
-		            'serviceType' => $serviceType,
-		            'title' => self::$services[$serviceType]
-	            ];
-                $this->rates[self::$services[$serviceType]] = $total;
+            if (isset($this->response->RateReplyDetails))
+            {
+
+                if (is_object($this->response->RateReplyDetails))
+                {
+                    $this->response->RateReplyDetails = array($this->response->RateReplyDetails);
+                }
+
+                foreach ($this->response->RateReplyDetails as $rate)
+                {
+                    $serviceType = (string) $rate->ServiceType;
+                    $total       = number_format((string) $rate->RatedShipmentDetails[0]->ShipmentRateDetail->TotalNetCharge->Amount, 2);
+
+                    $this->ratesExtended[$serviceType]          = (object) [
+                        'shipper'         => 'fedex',
+                        'total'           => $total,
+                        'PackagingType'   => (string) $rate->PackagingType,
+                        'SignatureOption' => (string) $rate->SignatureOption,
+                        'ActualRateType'  => (string) $rate->ActualRateType,
+                        'serviceType'     => $serviceType,
+                        'title'           => self::$services[$serviceType]
+                    ];
+                    $this->rates[self::$services[$serviceType]] = $total;
+                }
             }
+
             $this->rates = array_reverse($this->rates, true);
         }
     }
@@ -507,6 +668,7 @@ class Fedex extends AbstractAdapter
 
     /**
      * Get Package
+     *
      * @return \Pop\Shipping\PackageAdapter\Fedex
      */
     public function getPackage()
