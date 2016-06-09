@@ -57,11 +57,16 @@ abstract class AbstractAdapter implements AdapterInterface
 		return $this->weight['Value'];
 	}
 
+	/**
+	 * Get dimensions
+	 *
+	 * @return array
+	 */
 	public function getDimensions()
 	{
 		return $this->dimensions;
 	}
-	
+
 	/**
 	 * @param array $dimensions
 	 * @param null  $unit

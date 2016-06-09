@@ -87,6 +87,19 @@ abstract class AbstractAdapter implements AdapterInterface
     protected $shippingInfo;
 
     /**
+     * Invoice number
+     *
+     * @var string
+     */
+    protected $invoice;
+
+    /**
+     * Customer Ref
+     *
+     * @var string
+     */
+    protected $customerRef;
+    /**
      * Confirm a shipment
      *
      * @param bool $verifyPeer
@@ -207,6 +220,16 @@ abstract class AbstractAdapter implements AdapterInterface
     public function setInsurance($value)
     {
         $this->insuranceValue = $value;
+    }
+
+    public function setInvoice($invoice)
+    {
+        $this->invoice = $invoice;
+    }
+
+    public function setCustomerRef($ref)
+    {
+        $this->customerRef = $ref;
     }
 
     /**

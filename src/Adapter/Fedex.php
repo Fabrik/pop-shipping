@@ -413,8 +413,7 @@ class Fedex extends AbstractAdapter
 
         // @TODO - insured value & amount & customer reference
         $packageLineItem = array(
-            'SequenceNumber'     => $index + 1,
-            'GroupPackageCount'  => 1,
+            'SequenceNumber'     => (string) $index + 1,
             'InsuredValue'       => array(
                 'Amount'   => floatval($this->insuranceValue),
                 'Currency' => 'USD'
@@ -423,24 +422,15 @@ class Fedex extends AbstractAdapter
                 'Value' => $package->getWeight(),
                 'Units' => 'LB'
             ],
-            'Dimensions'         =>  [
-                'Length' => null,
-                'Width'  => null,
-                'Height' => null,
-                'Units'  => 'IN'
-            ],
+            'Dimensions'         =>   $package->getDimensions(),
             'CustomerReferences' => array(
                 '0' => array(
                     'CustomerReferenceType' => 'CUSTOMER_REFERENCE', // valid values CUSTOMER_REFERENCE, INVOICE_NUMBER, P_O_NUMBER and SHIPMENT_INTEGRITY
-                    'Value'                 => 'GR4567892'
+                    'Value'                 => $this->customerRef
                 ),
                 '1' => array(
                     'CustomerReferenceType' => 'INVOICE_NUMBER',
-                    'Value'                 => 'INV4567892'
-                ),
-                '2' => array(
-                    'CustomerReferenceType' => 'P_O_NUMBER',
-                    'Value'                 => 'PO4567892'
+                    'Value'                 => $this->invoice
                 )
             )
         );
@@ -482,7 +472,7 @@ class Fedex extends AbstractAdapter
      *
      * @throws \Exception
      *
-     * @return array [String:filetype, String:Label image data]
+     * @return array [String:filetype, array [String:Label image data]]
      */
     public function ship($verifyPeer = true)
     {
@@ -520,11 +510,12 @@ class Fedex extends AbstractAdapter
         try
         {
             $request        = array_merge($this->requestHeader, $request);
+            $request['TransactionDetail']['CustomerTransactionId'] = '  Ship Request v17 using PHP';
             $this->client   = new \SoapClient($this->wsdl['shipping'], ['trace' => 1]);
             $this->response = $this->client->processShipment($request);
             $this->handleShipmentResponse($this->response);
             $masterTrackingId = $this->response->CompletedShipmentDetail->MasterTrackingId;
-            $labels[]         = base64_decode($this->response->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image);
+            $labels[]         = $this->response->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image;
 
             if (count($this->packages) > 1)
             {
@@ -536,9 +527,8 @@ class Fedex extends AbstractAdapter
                         '0' => $this->addPackageLineItem($i)
                     );
                     $childResponse                        = $this->client->processShipment($request);
-                    print_r($childResponse);
                     $this->handleShipmentResponse($childResponse);
-                    $labels[] = base64_decode($childResponse->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image);
+                    $labels[] = $childResponse->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image;
                 }
             }
         }
@@ -547,14 +537,16 @@ class Fedex extends AbstractAdapter
             throw new \Exception($e->getMessage(), $e->getCode());
         }
 
-        echo "<pre>";
-        print_r($this->response);
-
-        exit;
-
         return ['png', $labels];
     }
 
+    /**
+     * Check the shipping response for errors
+     *
+     * @param $response
+     *
+     * @throws \Exception
+     */
     private function handleShipmentResponse($response)
     {
         if ($response->HighestSeverity === 'FAILURE ' || $response->HighestSeverity === 'ERROR')

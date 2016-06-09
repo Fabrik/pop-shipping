@@ -261,4 +261,14 @@ class Shipping
 		$this->adapter->declaredValue($value);
 	}
 
+	public function setInvoice($id)
+	{
+		return $this->adapter()->setInvoice($id);
+	}
+
+	public function setCustomerRef($ref)
+	{
+		return $this->adapter()->setCustomerRef($ref);
+	}
+
 }

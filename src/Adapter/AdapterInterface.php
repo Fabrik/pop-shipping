@@ -130,6 +130,20 @@ interface AdapterInterface
     public function getPackage();
 
     /**
+     * @param string $invoice
+     *
+     * @return mixed
+     */
+    public function setInvoice($invoice);
+
+    /**
+     * @param string $ref
+     *
+     * @return mixed
+     */
+    public function setCustomerRef($ref);
+    
+    /**
      * Set the declared shipment value
      * @param  float $value
      * @return void

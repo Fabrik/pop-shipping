@@ -403,10 +403,11 @@ class Ups extends AbstractAdapter
 	 *
 	 * @param bool $verifyPeer
 	 *
-	 * @return string Shipping label
+	 * @return array [String:filetype, array [String:Label image data]]
 	 */
 	public function ship($verifyPeer = true)
 	{
+		$labels = [];
 		$xml = $this->buildConfirmRequest();
 
 		$options = [
@@ -439,7 +440,7 @@ class Ups extends AbstractAdapter
 
 		if ($this->responseCode == 1)
 		{
-			$this->label = $this->sendAcceptRequest((string) $this->response->ShipmentDigest, $verifyPeer);
+			$labels[] = $this->sendAcceptRequest((string) $this->response->ShipmentDigest, $verifyPeer);
 		}
 		else
 		{
@@ -447,7 +448,7 @@ class Ups extends AbstractAdapter
 			$this->responseMessage = (string) $this->response->Response->Error->ErrorDescription;
 		}
 
-		return $this->label;
+		return ['gif', $labels];
 	}
 
 	/**

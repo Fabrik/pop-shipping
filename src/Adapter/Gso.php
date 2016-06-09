@@ -443,12 +443,12 @@ class Gso extends AbstractAdapter
 	 *
 	 * @throws \Exception
 	 *
-	 * @return array [String:filetype, String:Label image data]
+	 * @return array [String:filetype, array [String:Label image data]]
 	 */
 	public function ship($verifyPeer = true)
 	{
 		$request = [];
-
+		$labels = [];
 
 		$this->trackingNumber = '012312312';
 		$this->shipmentReference = 'aadfasdfasdf';
@@ -536,9 +536,9 @@ class Gso extends AbstractAdapter
 			throw new \Exception(implode("\n", $errorMsg), $errors[0]->Code);
 		}
 
-		$label = $this->response->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image;
+		$labels[] = $this->response->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image;
 
-		return ['gif', $label];
+		return ['gif', $labels];
 	}
 
 	private function getClient()
